@@ -11,35 +11,63 @@
 
     using var connection = connectionFactory.CreateConnection();
     using var channel = connection.CreateModel();
+
+    channel.ConfirmSelect();
     
-    var properties = channel.CreateBasicProperties();
-    properties.Persistent = true;
-
-    while (true)
-    {
-        Console.Write("> ");
-        string? message = Console.ReadLine();
-        if (string.IsNullOrEmpty((message)))
+    channel.BasicAcks +=
+        (_, eventArgs) =>
         {
-            break;
-        }
+            WriteLine("BasicAck " + eventArgs.DeliveryTag.ToString() + (eventArgs.Multiple ? "*" : string.Empty));
+        };
+    channel.BasicNacks +=
+        (_, eventArgs) =>
+        {
+            WriteLine("BasicNack " + eventArgs.DeliveryTag.ToString() + (eventArgs.Multiple ? "*" : string.Empty));
+        };
+    channel.BasicReturn +=
+        (_, eventArgs) =>
+        {
+            WriteLine($"BasicReturn {eventArgs.ReplyCode} {eventArgs.ReplyText}");
+            WriteLine("Message id " + eventArgs.BasicProperties.MessageId);
+        };
 
-        var body = Encoding.UTF8.GetBytes(message);
 
-        channel.BasicPublish(
-            "",
-            "testdev1", 
-            false, 
-            properties, 
-            body
-        );
-
-        Console.WriteLine("Send");
+    for (int i = 0; i < 20; i++)
+    {
+        Publish(channel, i.ToString());
     }
+    
+    WriteLine("End");
+    Console.ReadLine();
 }
 catch (Exception ex)
 {
-    Console.WriteLine(ex);
+    WriteLine(ex.ToString());
 }
 
-Console.WriteLine("End");
+
+static void Publish(IModel channel, string message)
+{
+    var properties = channel.CreateBasicProperties();
+    properties.Persistent = true;
+    properties.MessageId = Guid.NewGuid().ToString();
+    
+    var body = Encoding.UTF8.GetBytes(message);
+
+    WriteLine($"Next seq number: {channel.NextPublishSeqNo} messageId: {properties.MessageId}");
+    channel.BasicPublish(
+        "",
+        "testdev1", 
+        true, 
+        properties, 
+        body
+    );
+
+    WriteLine("Sent");
+}
+
+static void WriteLine(string message)
+{
+    int threadId = Environment.CurrentManagedThreadId;
+    Console.WriteLine( threadId.ToString() + " " + message);
+}

@@ -16,16 +16,17 @@ try
 
     var consumer = new EventingBasicConsumer(channel);
     
-    consumer.Received += (model, ea) =>
+    consumer.Received += (_, ea) =>
     {
         var body = ea.Body.ToArray();
         var message = Encoding.UTF8.GetString(body);
         Console.WriteLine(" [x] Received {0}", message);
+        channel.BasicAck(ea.DeliveryTag, false);
     };
     
     channel.BasicConsume(
         "testdev1",
-        true,
+        false,
         "test-tag",
         false,
         false,
