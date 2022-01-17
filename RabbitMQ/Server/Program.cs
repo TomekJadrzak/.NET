@@ -1,5 +1,11 @@
 ﻿using RabbitMQ.Client.Events;
 
+if (args.Length == 0)
+{
+    Console.WriteLine("Too few args");
+    return;
+}
+
 try
 {
     ConnectionFactory connectionFactory =
@@ -24,8 +30,16 @@ try
         channel.BasicAck(ea.DeliveryTag, false);
     };
     
+    // channel.BasicConsume(
+    //     "testdev1",
+    //     false,
+    //     "test-tag",
+    //     false,
+    //     false,
+    //     null,
+    //     consumer);
     channel.BasicConsume(
-        "testdev1",
+        args[0],
         false,
         "test-tag",
         false,
