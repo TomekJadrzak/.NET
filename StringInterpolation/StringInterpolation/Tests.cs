@@ -6,8 +6,10 @@ namespace StringInterpolation
     [MemoryDiagnoser]
     public class Tests
     {
-        private int a = 6;
-        private int b = 12;
+        // private int a = 6;
+        // private int b = 12;
+        private string a = "6";
+        private string b = "12";
 
         [Benchmark]
         public string StringConcat()
