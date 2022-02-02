@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+
+Open console (Ctrl+Shift+I) to see the output.
+
+<!-- Import as a global 'dotnet' object via script tag. -->
+<script src="bin/dotnet.js"></script>
+
+<script>
+
+    // Providing implementation for 'GetHostName' function declared in 'HelloWorld' C# assembly.
+    dotnet.NetJS.WasmTests.GetHostName = () => "Browser";
+
+    window.onload = async function () {
+        // Booting the DotNet runtime and invoking entry point.
+        await dotnet.boot();
+        // Invoking 'GetName()' C# method defined in 'HelloWorld' assembly.
+        const guestName = dotnet.NetJS.WasmTests.GetName();
+        console.log(`Welcome, ${guestName}! Enjoy your global space.`);
+        const info = dotnet.NetJS.WasmTests.PassProcessInfo(
+            {
+                // C# property names are changed from PascalCase to camelCase
+                id: 1,
+                unitSymbol: "AAAA",
+                active: false,
+                activeFrom: new Date()
+            }  
+        );
+        console.log(info);
+    };
+
+</script>
