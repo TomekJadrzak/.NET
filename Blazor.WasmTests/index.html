@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+
+<script src="_framework/blazor.webassembly.js" autostart="false"></script>
+
+<script>
+    window.getTime = () => {
+        return new Date().toJSON();
+    };
+    window.onload = async function () {
+        await Blazor.start();
+        const msg = await DotNet.invokeMethodAsync("Blazor.WasmTests", "BuildMessage", "John");
+        console.log(msg);
+        
+        const code = "PF.Toe == 11";
+        const code2 = await DotNet.invokeMethodAsync("Blazor.WasmTests", "FixCondition", code);
+        console.log(code2);
+    };
+</script>
